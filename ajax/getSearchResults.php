@@ -7,8 +7,8 @@ require_once("../includes/classes/PreviewProvider.php");
 
 if(isset($_POST["term"]) && isset($_POST["username"])) {
 
-  $srp = new SearchResultsProvider($con, $_POST["username"]);
-  echo $srp->getResults($_POST["term"]);
+    $srp = new SearchResultsProvider($con, $_POST["username"]);
+    echo $srp->getResults($_POST["term"]);
 
 }
 else {
