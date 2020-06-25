@@ -1,10 +1,10 @@
 <?php
 require_once("includes/header.php");
-// require_once("includes/paypalConfig.php");
+require_once("includes/paypalConfig.php");
 require_once("includes/classes/Account.php");
 require_once("includes/classes/FormSanitizer.php");
 require_once("includes/classes/Constants.php");
-// require_once("includes/classes/BillingDetails.php");
+require_once("includes/classes/BillingDetails.php");
 
 $user = new User($con, $userLoggedIn);
 
@@ -55,40 +55,38 @@ if(isset($_POST["savePasswordButton"])) {
 }
 
 if (isset($_GET['success']) && $_GET['success'] == 'true') {
-    $token = $_GET['token'];
-    $agreement = new \PayPal\Api\Agreement();
+  $token = $_GET['token'];
+  $agreement = new \PayPal\Api\Agreement();
 
-    $subscriptionMessage = "<div class='alertError'>
+  $subscriptionMessage = "div class='alertError'>
                             Something went wrong!
-                        </div>";
+                          </div>";
+  try {
+    // Execute agreement
+    $agreement->execute($token, $apiContext);
 
-    try {
-      // Execute agreement
-      $agreement->execute($token, $apiContext);
+      $result = BillingDetails::insertDetails($con, $agreement, $token, $userLoggedIn);
+      $result = $result && $user->setIsSubscribed(1);
+    // Update user's account status
 
-        $result = BillingDetails::insertDetails($con, $agreement, $token, $userLoggedIn);
-        $result = $result && $user->setIsSubscribed(1);
+      if($result) {
+          $subscriptionMessage = "div class='alertSuccess'>
+                                    You're all signed up!
+                                  </div>";
+      }
 
-        if($result) {
-            $subscriptionMessage = "<div class='alertSuccess'>
-                            You're all signed up!
-                        </div>";
-        }
-
-
-    } catch (PayPal\Exception\PayPalConnectionException $ex) {
-      echo $ex->getCode();
-      echo $ex->getData();
-      die($ex);
-    } catch (Exception $ex) {
-      die($ex);
-    }
+  } catch (PayPal\Exception\PayPalConnectionException $ex) {
+    echo $ex->getCode();
+    echo $ex->getData();
+    die($ex);
+  } catch (Exception $ex) {
+    die($ex);
   }
-  else if (isset($_GET['success']) && $_GET['success'] == 'false') {
-    $subscriptionMessage = "<div class='alertError'>
+} else if (isset($_GET['success']) && $_GET['success'] == 'false') {
+    $subscriptionMessage = "div class='alertError'>
                             User cancelled or something went wrong!
                         </div>";
-  }
+}
 
 ?>
 
@@ -149,7 +147,6 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         <div class="message">
             <?php echo $subscriptionMessage; ?>
         </div>
-
         <?php
 
         if($user->getIsSubscribed()) {

@@ -35,12 +35,12 @@ $currentUrl = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $returnUrl = str_replace("billing.php", "profile.php", $currentUrl);
 // Set merchant preferences
 $merchantPreferences = new MerchantPreferences();
-$merchantPreferences->setReturnUrl($currentUrl . "?success=true")
+$merchantPreferences->setReturnUrl($returnUrl . "?success=true")
   ->setCancelUrl($currentUrl . "?success=false")
   ->setAutoBillAmount('yes')
   ->setInitialFailAmountAction('CONTINUE')
-  ->setMaxFailAttempts('0');
-  // ->setSetupFee(new Currency(array('value' => 1, 'currency' => 'USD')));
+  ->setMaxFailAttempts('0')
+  ->setSetupFee(new Currency(array('value' => 9.99, 'currency' => 'EUR')));
 
 $plan->setPaymentDefinitions(array($paymentDefinition));
 $plan->setMerchantPreferences($merchantPreferences);
